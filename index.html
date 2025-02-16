@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,46 +8,115 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
     <header>
         <div class="header-content">
             <div class="logo">
                 <i data-lucide="shopping-bag"></i>
-                <h1>Shopping Cart</h1>
+                <h2>Shopping Cart</h2>
             </div>
         </div>
     </header>
 
     <main>
         <div class="container">
-            <div class="products-grid">
-                <!-- Products will be dynamically inserted here -->
-            </div>
-            
+            <div class="products-grid"></div>
+
             <div class="cart-container">
                 <div class="cart">
                     <div class="cart-header">
                         <h2>Shopping Cart</h2>
                         <button class="clear-cart-btn">
                             <i data-lucide="trash-2"></i>
-                            Clear Cart
+                            <b>Clear Cart</b>
                         </button>
                     </div>
-                    <div class="cart-items">
-                        <!-- Cart items will be dynamically inserted here -->
-                    </div>
+                    <div class="cart-items"></div>
                     <div class="cart-footer">
-                        <div class="cart-total">
-                            <span>Total:</span>
-                            <span class="total-amount">$0.00</span>
+                        <div class="promo-code-section">
+                            <div class="promo-input-group">
+                                <input type="text" id="promoCode" placeholder="Enter promo code" class="promo-input">
+                                <button class="apply-promo-btn">
+                                    <i data-lucide="ticket"></i>
+                                    <b>Apply</b>
+                                </button>
+                            </div>
+                            <div class="promo-message"></div>
                         </div>
-                        <button class="checkout-btn">Proceed to Checkout</button>
+                        <div class="cart-summary">
+                            <div class="summary-row">
+                                <span><b>Subtotal:</b></span>
+                                <span class="subtotal-amount">$0.00</span>
+                            </div>
+                            <div class="summary-row discount-row hidden">
+                                <span><b>Discount:</b></span>
+                                <span class="discount-amount">-$0.00</span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Total:</span>
+                                <span class="total-amount">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="checkout-btn"><b>Proceed to Checkout</b></button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- HTML Templates -->
+    <template id="product-template">
+        <div class="product-card">
+            <div class="product-image-slider">
+                <button class="prev-btn">❮</button>
+                <img class="product-image">
+                <button class="next-btn">❯</button>
+            </div>
+            <div class="product-details">
+                <h3 class="product-name"></h3>
+                <p class="product-description"></p>
+                <div class="product-footer">
+                    <span class="product-price"></span>
+                    <button class="add-to-cart-btn">
+                        <i data-lucide="plus"></i>
+                        <b>Add to Cart</b>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="cart-item-template">
+        <div class="cart-item">
+            <img class="cart-item-image">
+            <div class="cart-item-details">
+                <h3 class="cart-item-name"></h3>
+                <p class="cart-item-price"></p>
+            </div>
+            <div class="cart-item-controls">
+                <button class="quantity-btn decrease">
+                    <i data-lucide="minus"></i>
+                </button>
+                <span class="cart-item-quantity"></span>
+                <button class="quantity-btn increase">
+                    <i data-lucide="plus"></i>
+                </button>
+                <button class="remove-item-btn">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <template id="empty-cart-template">
+        <div class="empty-cart">
+            <i data-lucide="shopping-cart" size="48"></i>
+            <p><b>Your cart is empty</b></p>
+        </div>
+    </template>
+
     <script src="script.js"></script>
 </body>
+
 </html>

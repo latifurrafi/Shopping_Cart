@@ -6,7 +6,7 @@ const products = [
         price: 199.99,
         images: [
             'http://127.0.0.1:5500/images/h1.jpg',
-            'http://127.0.0.1:5500/images/h.png'       
+            'http://127.0.0.1:5500/images/h.png'
         ]
     },
     {
@@ -87,7 +87,7 @@ const products = [
         images: [
             'http://127.0.0.1:5500/images/t2.jpg',
             'http://127.0.0.1:5500/images/t1.webp'
-            
+
         ]
     },
     {
@@ -142,113 +142,146 @@ const products = [
     }
 ];
 
+// Promo codes---------------------------------------------------------
+const promoCodes = {
+    'ostad10': { discount: 0.10, description: '10% discount' },
+    'ostad5': { discount: 0.05, description: '5% discount' }
+};
+//----------------------------------------------------------------------
 
+// Cart state
 let cart = [];
+let appliedPromoCode = null;//---------------------------------------
 
-const productsGrid = document.querySelector(".products-grid");
-const cartItems = document.querySelector(".cart-items");
-const cartContainer = document.querySelector('.cart-container');
+// DOM Elements
+const productsGrid = document.querySelector('.products-grid');
+const cartItems = document.querySelector('.cart-items');
+const subtotalAmount = document.querySelector('.subtotal-amount');
+const discountRow = document.querySelector('.discount-row');
+const discountAmount = document.querySelector('.discount-amount');
 const totalAmount = document.querySelector('.total-amount');
 const clearCartBtn = document.querySelector('.clear-cart-btn');
 const checkoutBtn = document.querySelector('.checkout-btn');
+const promoInput = document.querySelector('#promoCode');//---------------------------------------
+const applyPromoBtn = document.querySelector('.apply-promo-btn');//------------------------------
+const promoMessage = document.querySelector('.promo-message');//---------------------------------
 
+
+const productTemplate = document.querySelector('#product-template');
+const cartItemTemplate = document.querySelector('#cart-item-template');
+const emptyCartTemplate = document.querySelector('#empty-cart-template');
+
+// Initialize Lucide icons
 lucide.createIcons();
+
+// Create element from template
+function createElementFromTemplate(template) {
+    return template.content.cloneNode(true).firstElementChild;
+}
 
 // Render products
 function renderProducts() {
-    productsGrid.innerHTML = products.map(product => `
-        <div class="product-card">
-            <!-- Image Slider -->
-            <div class="product-image-slider">
-                <button class="prev-btn" onclick="changeImage('${product.id}', 'prev')">❮</button>
-                <img src="${product.images[1]}" alt="${product.name}" class="product-image" id="image-${product.id}">
-                <button class="next-btn" onclick="changeImage('${product.id}', 'next')">❯</button>
-            </div>
+    productsGrid.innerHTML = '';
 
-            <div class="product-details">
-                <h3 class="product-name">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
-                <div class="product-footer">
-                    <span class="product-price">$${product.price.toFixed(2)}</span>
-                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
-                        <i data-lucide="plus"></i>
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-    
-    // Reinitialize icons for newly added elements
+    products.forEach(product => {
+        const element = createElementFromTemplate(productTemplate);
+        element.querySelector('.product-image').src = product.images[0];
+        element.querySelector('.product-image').alt = product.name;
+        element.querySelector('.product-image').id = `image-${product.id}`;
+        element.querySelector('.product-name').textContent = product.name;
+        element.querySelector('.product-description').textContent = product.description;
+        element.querySelector('.product-price').textContent = `$${product.price.toFixed(2)}`;
+        element.querySelector('.prev-btn').addEventListener('click', () => changeImage(product.id, 'prev'));
+        element.querySelector('.next-btn').addEventListener('click', () => changeImage(product.id, 'next'));
+        element.querySelector('.add-to-cart-btn').addEventListener('click', () => addToCart(product.id));
+
+        productsGrid.appendChild(element);
+    });
     lucide.createIcons();
 }
 
-
+// Image slider functionality
 function changeImage(productId, direction) {
     const product = products.find(p => p.id === productId);
     const imageElement = document.getElementById(`image-${productId}`);
-    
-    // Get the current image index
-    const currentImageIndex = product.images.indexOf(imageElement.src);
-    
-    let newImageIndex;
-    
+    const currentSrc = imageElement.src;
+
+    const currentIndex = product.images.findIndex(img => img === currentSrc);
+    let newIndex;
+
     if (direction === 'next') {
-        newImageIndex = (currentImageIndex + 1) % product.images.length;
+        newIndex = (currentIndex + 1) % product.images.length;
     } else {
-        newImageIndex = (currentImageIndex - 1 + product.images.length) % product.images.length;
+        newIndex = (currentIndex - 1 + product.images.length) % product.images.length;
     }
-    
-    // Set the new image
-    imageElement.src = product.images[newImageIndex];
+
+    imageElement.src = product.images[newIndex];
 }
 
+// Calculate cart totals
+function calculateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    let discount = 0;
 
+    if (appliedPromoCode && promoCodes[appliedPromoCode]) {//-----------------------------------------
+        discount = subtotal * promoCodes[appliedPromoCode].discount;//-----------------------------------------
+    }
+
+    const total = subtotal - discount;
+
+    subtotalAmount.textContent = `$${subtotal.toFixed(2)}`;
+
+    if (discount > 0) {
+        discountRow.classList.remove('hidden');
+        discountAmount.textContent = `-$${discount.toFixed(2)}`;
+    } else {
+        discountRow.classList.add('hidden');
+    }
+
+    totalAmount.textContent = `$${total.toFixed(2)}`;
+}
 
 // Render cart
 function renderCart() {
+    cartItems.innerHTML = '';
+
     if (cart.length === 0) {
-        cartItems.innerHTML = `
-            <div class="empty-cart">
-                <i data-lucide="shopping-cart" size="48"></i>
-                <p>Your cart is empty</p>
-            </div>
-        `;
+        const emptyCart = createElementFromTemplate(emptyCartTemplate);
+        cartItems.appendChild(emptyCart);
+        discountRow.classList.add('hidden');
+        appliedPromoCode = null;//-----------------------------------------
+        promoInput.value = '';
+        promoMessage.innerHTML = '';
     } else {
-        cartItems.innerHTML = cart.map(item => `
-            <div class="cart-item">
-                <img src="${item.product.image}" alt="${item.product.name}" class="cart-item-image">
-                <div class="cart-item-details">
-                    <h3 class="cart-item-name">${item.product.name}</h3>
-                    <p class="cart-item-price">$${item.product.price.toFixed(2)}</p>
-                </div>
-                <div class="cart-item-controls">
-                    <button class="quantity-btn" onclick="updateQuantity('${item.product.id}', ${item.quantity - 1})">
-                        <i data-lucide="minus"></i>
-                    </button>
-                    <span class="cart-item-quantity">${item.quantity}</span>
-                    <button class="quantity-btn" onclick="updateQuantity('${item.product.id}', ${item.quantity + 1})">
-                        <i data-lucide="plus"></i>
-                    </button>
-                    <button class="remove-item-btn" onclick="removeFromCart('${item.product.id}')">
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        cart.forEach(item => {
+            const element = createElementFromTemplate(cartItemTemplate);
+
+            // Set cart item data
+            element.querySelector('.cart-item-image').src = item.product.images[0];
+            element.querySelector('.cart-item-image').alt = item.product.name;
+            element.querySelector('.cart-item-name').textContent = item.product.name;
+            element.querySelector('.cart-item-price').textContent = `$${item.product.price.toFixed(2)}`;
+            element.querySelector('.cart-item-quantity').textContent = item.quantity;
+
+            // Add event listeners
+            element.querySelector('.decrease').addEventListener('click', () =>
+                updateQuantity(item.product.id, item.quantity - 1));
+            element.querySelector('.increase').addEventListener('click', () =>
+                updateQuantity(item.product.id, item.quantity + 1));
+            element.querySelector('.remove-item-btn').addEventListener('click', () =>
+                removeFromCart(item.product.id));
+
+            cartItems.appendChild(element);
+        });
     }
-    
-    // Update total
-    const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-    totalAmount.textContent = `$${total.toFixed(2)}`;
-    
-    // Reinitialize icons for newly added elements
+
+    calculateTotals();
     lucide.createIcons();
 }
 
-
+// Cart operations
 function addToCart(productId) {
-    const product = products.find(p => p.id == productId);
+    const product = products.find(p => p.id === productId);
     const existingItem = cart.find(item => item.product.id === productId);
 
     if (existingItem) {
@@ -257,7 +290,6 @@ function addToCart(productId) {
         cart.push({ product, quantity: 1 });
         renderCart();
     }
-
 }
 
 function updateQuantity(productId, quantity) {
@@ -275,32 +307,61 @@ function removeFromCart(productId) {
     renderCart();
 }
 
-//For Clear Cart
 function clearCart() {
     if (cart.length === 0) {
         alert("Your Cart is already Empty.");
+        return;
     }
     cart = [];
     renderCart();
 }
 
-//Initialize
-function init() {
-    renderProducts();
-    renderCart();
+// Promo code handling--------------------------------------------------------------------------
+function applyPromoCode() {
+    const code = promoInput.value.trim().toLowerCase();
 
-    //Event Listeners
+    if (cart.length === 0) {
+        promoMessage.innerHTML = '<span class="error"><b>Your cart is empty</b></span>';
+        return;
+    }
+
+    if (appliedPromoCode) {
+        promoMessage.innerHTML = '<span class="error">A promo code is already applied</span>';
+        return;
+    }
+
+    if (promoCodes[code]) {
+        appliedPromoCode = code;
+        const discount = promoCodes[code].discount * 100;
+        promoMessage.innerHTML = `<span class="success">Promo code applied: ${discount}% off</span>`;
+        renderCart();
+    } else {
+        promoMessage.innerHTML = '<span class="error">Invalid promo code</span>';
+    }
+}
+//-----------------------------------------------------------------------------------------------------
+
+function init() {
+    // Event listeners
     clearCartBtn.addEventListener('click', clearCart);
-    checkoutBtn.addEventListener('click', () => {
-        if (cart.length > 0) {
-            alert('Thanks for Your Purchase.');
-            clearCart();
-        }
-        else {
-            alert("There is Nothing on Cart.")
+    applyPromoBtn.addEventListener('click', applyPromoCode);//-----------------------------------------
+    promoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            applyPromoCode();//-----------------------------------------
         }
     });
+    checkoutBtn.addEventListener('click', () => {
+        if (cart.length > 0) {
+            const discount = appliedPromoCode ? `with ${promoCodes[appliedPromoCode].description}` : '';//-----------------------------------------
+            alert(`Thank you for your purchase! ${discount}`);
+            clearCart();
+        } else {
+            alert("There is Nothing in Cart.");
+        }
+    });
+    renderProducts();
+    renderCart();
 }
 
-// Start
+// Start the app
 init();

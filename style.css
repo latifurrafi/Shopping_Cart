@@ -10,7 +10,6 @@ body {
     min-height: 100vh;
 }
 
-
 header {
     background-color: #055C9D;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -53,44 +52,6 @@ header {
     }
 }
 
-.product-image-slider {
-    position: relative;
-    width: 100%;
-    text-align: center;
-}
-
-.product-image-slider img {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
-}
-
-.prev-btn, .next-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.prev-btn {
-    left: 0;
-}
-
-.next-btn {
-    right: 0;
-}
-
-.product-card {
-    margin: 20px;
-    border: 1px solid #ddd;
-    padding: 15px;
-    background-color: #f9f9f9;
-}
-
 .products-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -102,6 +63,13 @@ header {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* .product-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+} */
 
 .product-card {
     background-color: white;
@@ -272,13 +240,87 @@ header {
     margin-top: 1.5rem;
 }
 
-.cart-total {
+.promo-code-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.promo-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.promo-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.promo-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.apply-promo-btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.apply-promo-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.promo-message {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.promo-message.success {
+    color: #059669;
+}
+
+.promo-message.error {
+    color: #dc2626;
+}
+
+.cart-summary {
+    margin-bottom: 1.5rem;
+}
+
+.summary-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.summary-row.total-row {
     font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.discount-row {
+    color: #059669;
+}
+
+.hidden {
+    display: none;
 }
 
 .checkout-btn {
