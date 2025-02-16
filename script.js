@@ -296,6 +296,9 @@ function init() {
             alert('Thanks for Your Purchase.');
             clearCart();
         }
+        else {
+            alert("There is Nothing on Cart.")
+        }
     });
 }
 
